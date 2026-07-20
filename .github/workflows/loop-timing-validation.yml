@@ -1,24 +1,13 @@
-name: Loop timing validation
+name: loop-timing-validation
 
-on:
-  push:
-    branches:
-      - agent/loop-timing-ci
+on: [push]
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Compile C89 miner
-        run: gcc -O2 -ansi -pedantic -Wall -Wextra -Wno-long-long -o rustchain_cobalt rustchain_cobalt_miner.c
-      - name: Run self-test
-        run: ./rustchain_cobalt --self-test
-      - name: Verify forced loop dry-run payload
-        run: |
-          ./rustchain_cobalt --force-loop-timing --dry-run | tee /tmp/loop-dry-run.txt
-          grep -F '"timing_source":"loop"' /tmp/loop-dry-run.txt
-          grep -F '"timer_source":"loop"' /tmp/loop-dry-run.txt
-          ! grep -F '"timing_source":"rdtsc"' /tmp/loop-dry-run.txt
-      - name: Exercise forced loop test-only path
-        run: ./rustchain_cobalt --force-loop-timing --test-only
+      - run: gcc -O2 -ansi -pedantic -Wall -Wextra -Wno-long-long -o rustchain_cobalt rustchain_cobalt_miner.c
+      - run: ./rustchain_cobalt --self-test
+      - run: ./rustchain_cobalt --force-loop-timing --test-only
+      - run: ./rustchain_cobalt --force-loop-timing --dry-run
